@@ -3,11 +3,11 @@
 
 import React, { useEffect, useState } from "react";
 
-interface UserData {
-  id: number;
-  name: string;
-  email: string;
-}
+// interface UserData {
+//   id: number;
+//   name: string;
+//   email: string;
+// }
 
 interface PasswordForm {
   oldPassword: string;
@@ -15,7 +15,7 @@ interface PasswordForm {
 }
 
 const ProfileUser: React.FC = () => {
-  const [user, setUser] = useState<UserData>({ id: 0, name: "", email: "" });
+  // const [user, setUser] = useState<UserData>({ id: 0, name: "", email: "" });
   const [formData, setFormData] = useState({ name: "", email: "" });
   const [showPasswordModal, setShowPasswordModal] = useState(false);
   const [passwordForm, setPasswordForm] = useState<PasswordForm>({
@@ -35,7 +35,7 @@ const ProfileUser: React.FC = () => {
         );
         if (!response.ok) throw new Error("Ошибка при загрузке пользователя");
         const data = await response.json();
-        setUser(data);
+        // setUser(data);
         setFormData({ name: data.Name || "", email: data.Email || "" });
       } catch (error) {
         console.error(error);
@@ -63,8 +63,8 @@ const ProfileUser: React.FC = () => {
       );
       if (!response.ok)
         throw new Error("Ошибка при обновлении данных пользователя");
-      const updatedUser = await response.json();
-      setUser(updatedUser);
+      // const updatedUser = await response.json();
+      // setUser(updatedUser);
       // Можно уведомить пользователя, что данные обновлены
     } catch (error) {
       console.error(error);

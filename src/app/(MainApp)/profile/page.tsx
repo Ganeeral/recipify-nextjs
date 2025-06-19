@@ -1,23 +1,10 @@
 "use client";
+import dynamic from "next/dynamic";
 
-import Profile from "@/components/profile/Profile.tsx";
-import { useRouter } from "next/navigation";
-import { useEffect } from "react";
+const ClientHome = dynamic(() => import("./ClientHome/ClientHome"), {
+  ssr: false,
+});
 
 export default function Home() {
-  const { push } = useRouter();
-  const token = localStorage.getItem("authToken");
-
-  useEffect(() => {
-    if (!token) {
-      push("/auth");
-    }
-  }, []);
-  return (
-    <div className="container">
-      <section className="flex flex-col justify-center items-center h-full">
-        <Profile />
-      </section>
-    </div>
-  );
+  return <ClientHome />;
 }

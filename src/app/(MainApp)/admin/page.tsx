@@ -1,4 +1,3 @@
-import Image from "next/image";
 import Admin from "@/components/admin/Admin.tsx";
 
 export default function Home() {

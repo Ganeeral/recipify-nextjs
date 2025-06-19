@@ -1,7 +1,6 @@
 'use client';
 
 import Image from "next/image";
-import cn from "classnames";
 import Banner from "@/components/banner/Banner.tsx";
 import About from "@/components/about/About.tsx";
 import Search from "@/components/search/Search.tsx";

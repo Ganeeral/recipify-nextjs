@@ -1,18 +1,28 @@
-'use client';
+"use client";
 
 import Image from "next/image";
 import AvtoReg from "@/components/auth/auth";
-import { useRouter } from 'next/navigation'
-import { useEffect } from "react";
+import { useRouter } from 'next/navigation';
+import { useEffect, useState } from "react";
 
-export default function Home() {
-  const { push } = useRouter();
-  const token = localStorage.getItem("authToken");
+export default function AuthPage() {
+  const router = useRouter();
+  const [isCheckingAuth, setIsCheckingAuth] = useState(true);
+
   useEffect(() => {
+    // Проверяем токен только на клиенте
+    const token = typeof window !== "undefined" ? localStorage.getItem("authToken") : null;
     if (token) {
-      push("/profile");
+      router.push("/profile");
+    } else {
+      setIsCheckingAuth(false);
     }
-  }, []);
+  }, [router]);
+
+  if (isCheckingAuth) {
+    return <div>Loading...</div>; // Или ваш лоадер
+  }
+
   return (
     <div className="container">
       <main className="flex flex-col justify-center items-center">

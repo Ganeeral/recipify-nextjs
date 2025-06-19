@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import HeartIcon from "public/heart.svg";
 
 interface Recipe {
   ID: number;

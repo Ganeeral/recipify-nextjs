@@ -1,4 +1,3 @@
-import Image from "next/image";
 import AboutText from "@/components/about/AboutText.tsx/AboutText.tsx";
 
 export default function About() {
