@@ -1,4 +1,7 @@
-const { GoogleGenerativeAI } = require("@google/generative-ai");
+
+const { OpenAI } = require("openai");
+// const { createDeepSeek } = require("@ai-sdk/deepseek");
+
 const express = require("express");
 const bodyParser = require("body-parser");
 const cors = require("cors");
@@ -7,54 +10,61 @@ const app = express();
 app.use(cors());
 app.use(bodyParser.json());
 
-// Инициализация Google Generative AI
-const genAI = new GoogleGenerativeAI("AIzaSyCNXTd8Q583IcEddDWX3BBr95-Bz5kZa2U");
-const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
-
-const MAX_RETRIES = 3; // Максимальное количество попыток
-const RETRY_DELAY = 3000; // Задержка между попытками (3 секунды)
-
-async function generateRecipeWithRetries(prompt, retries = MAX_RETRIES) {
-    for (let attempt = 1; attempt <= retries; attempt++) {
-        try {
-            // Попытка сгенерировать контент
-            const result = await model.generateContent(prompt);
-            return result.response.text().trim();
-        } catch (error) {
-            // Если это не ошибка 503 или превышен лимит попыток, выбрасываем её
-            if (error.status !== 503 || attempt === retries) {
-                throw error;
-            }
-            console.warn(`Попытка ${attempt} из ${retries} не удалась. Повтор через ${RETRY_DELAY / 1000} секунд...`);
-            await new Promise((resolve) => setTimeout(resolve, RETRY_DELAY)); // Задержка перед повтором
-        }
-    }
-}
-
-app.post("/generate-recipe", async (req, res) => {
-    const { ingredients } = req.body;
-
-    const prompt = `
-      Ты — ИИ, который создает уникальные рецепты на основе доступных ингредиентов. Пользователь ввел список ингредиентов: "${ingredients}".
-      Пожалуйста, предложи другое блюдо, которое можно приготовить, и напиши подробный рецепт. Ты должен выводить только те рецепты, которые съедобны для человека. Если пользователь ввел несъедобные игредиенты, то выводи - "Введите съедобные игредиенты."
-      Формат ответа:
-      Название блюда: [название]
-      Рецепт:
-      [инструкция]
-    `;
-
-    try {
-        const recipe = await generateRecipeWithRetries(prompt);
-        res.json({ recipe });
-    } catch (error) {
-        console.error("Ошибка Google AI:", error);
-        res.status(error.status || 500).json({
-            error: "Не удалось сгенерировать рецепт. Попробуйте еще раз чуть позже.",
-        });
-    }
+const openai = new OpenAI({
+  baseURL: "https://openrouter.ai/api/v1",
+  apiKey:
+    "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",
 });
 
+app.post("/generate-recipe", async (req, res) => {
+  const { ingredients } = req.body;
 
-app.listen(5000, () => {
+  try {
+    const prompt = `
+    Ты — профессиональный шеф-повар. Твоя задача — анализировать предоставленные ингредиенты и создавать кулинарные рецепты ТОЛЬКО если все ингредиенты съедобны.
+
+    Строгие правила:
+    1. Сначала определи, являются ли ВСЕ ингредиенты съедобными продуктами. Проверь каждый ингредиент отдельно.
+    2. Если обнаружены явно несъедобные элементы (например, "ашщз", "камни", "пластик") или бессмысленный набор символов:
+        - Ответь ТОЛЬКО: "Пожалуйста, введите съедобные ингредиенты."
+        - Не предлагай рецепт
+        - Не добавляй пояснений
+    3. Для съедобных ингредиентов:
+        - Создай рецепт в строгом формате без лишних символов
+        - Убери все markdown (**, plaintext и т.д.)
+        - Используй только обычный текст с разделением на строки
+
+    Формат для валидных ингредиентов:
+    Название: [Название блюда]
+    Ингредиенты: [список]
+    Приготовление:
+    1. [Шаг 1]
+    2. [Шаг 2]
+    Совет: [короткая рекомендация]
+
+    Текущие ингредиенты: "${ingredients}"
+
+    Будь креативным, но сохраняй реалистичность рецепта!
+`;
+
+    const result = await openai.chat.completions.create({
+      model: "mistralai/devstral-small:free",
+      messages: [
+        {
+          role: "user",
+          content: prompt,
+        },
+      ],
+    });
+
+    const aiResponse = result.choices[0].message.content.trim();
+
+    res.json({ recipe: aiResponse });
+  } catch {
+    res.status(500).json({ error: "Failed to analyze scene" });
+  }
+});
+
+app.listen(5001, () => {
   console.log("AI Server running on port 5000");
 });

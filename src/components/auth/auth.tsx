@@ -31,13 +31,17 @@ export default function Auth() {
       : { ...formData };
 
     try {
-      const response = await fetch(`http://localhost:8080${endpoint}`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(body),
-      });
+      const response = await fetch(
+        `https://delico-backend.cloudpub.ru${endpoint}`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(body),
+        }
+      );
 
       const result = await response.json();
+      console.log(result)
 
       if (!response.ok) {
         // Показываем ошибку Toastify
@@ -45,17 +49,25 @@ export default function Auth() {
         return;
       }
 
-      const { token, user } = result;
-      const { ID } = user;
+      if (response.ok) {
+        setIsLogin(true);
+      }
 
-      localStorage.setItem("authToken", token);
-      localStorage.setItem("id", ID);
+      if (isLogin) {
+        const { token, user } = result;
+        const { ID } = user;
+
+        localStorage.setItem("authToken", token);
+        localStorage.setItem("id", ID);
+      }
 
       // Успешное действие
       toast.success(
         isLogin ? "Вы успешно вошли в систему" : "Регистрация прошла успешно"
       );
-      setTimeout(() => push("/profile"), 2000); // Перенаправление после небольшой задержки
+      if (isLogin) {
+        setTimeout(() => push("/profile"), 2000); // Перенаправление после небольшой задержки
+      }
     } catch (error) {
       console.error("Ошибка:", error);
       toast.error("Произошла ошибка, попробуйте снова");
@@ -111,12 +123,15 @@ export default function Auth() {
 
       <form
         onSubmit={handleSubmit}
-        className={`flex flex-col justify-center h-screen w-full blur__banner backdrop-opacity-10 backdrop-invert bg-[#DABF94]/60 rounded-[20px] text-[#F9F1E6] max-w-[310px] mobile-xs:min-w-[425px] sm:min-w-[350px] md:min-w-[480px] max-h-[550px] px-[15px] mobile-xs:px-[50px] pt-8 pb-14 gap-64 transition-transform duration-500 ${isLogin ? " md:-translate-x-[480px]" : ""}`}
+        className={`flex flex-col justify-center h-screen w-full blur__banner backdrop-opacity-10 backdrop-invert bg-[#DABF94]/60 rounded-[20px] text-[#F9F1E6] max-w-[310px] mobile-xs:min-w-[425px] sm:min-w-[350px] md:min-w-[480px] max-h-[550px] px-[15px] mobile-xs:px-[50px] pt-8 pb-14 gap-64 transition-transform duration-500 ${
+          isLogin ? " md:-translate-x-[480px]" : ""
+        }`}
       >
         <div className="flex flex-col items-end w-full h-full">
           <div
-            className={`flex ${isLogin ? "justify-start" : "justify-end"
-              } w-full`}
+            className={`flex ${
+              isLogin ? "justify-start" : "justify-end"
+            } w-full`}
           >
             <Link href="../">
               <Image
@@ -146,7 +161,7 @@ export default function Auth() {
                 type="text"
                 name="name"
                 onChange={handleChange}
-                placeholder="NAME"
+                placeholder="ИМЯ"
                 className="bg-inherit border-b-black border border-x-0 border-t-0 placeholder-black font-['ArsenalR'] text-black focus:outline-none"
               />
             )}
@@ -160,7 +175,7 @@ export default function Auth() {
             <input
               type="password"
               name="password"
-              placeholder="PASSWORD"
+              placeholder="ПАРОЛЬ"
               onChange={handleChange}
               className="bg-inherit border-b-black border border-x-0 border-t-0 placeholder-black font-['ArsenalR'] text-black focus:outline-none"
             />
@@ -168,7 +183,7 @@ export default function Auth() {
             {!isLogin && (
               <input
                 type="password"
-                placeholder="CONFIRM PASSWORD"
+                placeholder="ПОВТОРИТЕ ПАРОЛЬ"
                 name="confirmPassword"
                 onChange={handleChange}
                 className="bg-inherit border-b-black border border-x-0 border-t-0 placeholder-black font-['ArsenalR'] text-black focus:outline-none"
@@ -178,15 +193,12 @@ export default function Auth() {
 
           {!isLogin && (
             <div className="flex items-center text-center gap-[5px] w-full mt-[40px] mb-[40px]">
-              <input
-                type="checkbox"
-                className="bg-inherit border-b-black border"
-              />
+              
               <a
                 href=""
-                className="text-black text-[12px] font-['ArsenalB'] underline"
+                className="text-black text-[12px] font-['ArsenalB']"
               >
-                политика конфиденциальности
+                 Продолжая, Вы соглашаетесь с <span className="underline">Политикой конфиденциальности</span>
               </a>
             </div>
           )}

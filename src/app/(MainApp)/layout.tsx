@@ -2,7 +2,7 @@
 import "@/app/globals.css";
 import Image from "next/image";
 import cn from "classnames";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 
 export default function MainAppLayout({
@@ -11,6 +11,14 @@ export default function MainAppLayout({
   children: React.ReactNode;
 }>) {
   const [isOpen, setIsOpen] = useState(false);
+  const [userID, setUserID] = useState<number | null>(null);
+
+  useEffect(() => {
+    const storedId = localStorage.getItem("id");
+    if (storedId) {
+      setUserID(Number(storedId));
+    }
+  }, []);
 
   const handleLogout = () => {
     localStorage.removeItem("authToken");
@@ -23,7 +31,7 @@ export default function MainAppLayout({
   };
 
   return (
-    <div id="page" className="relative">
+    <div id="page" className="relative h-full">
       {/* <Image
         className="absolute top-0"
         src="/fon.png"
@@ -41,7 +49,7 @@ export default function MainAppLayout({
           className={cn(
             "block h-[2px] w-6 bg-[#ECD7BA] rounded-[30px] transition-all duration-300",
             isOpen
-              ? "rotate-45 translate-y-[5px] w-7 bg-white"
+              ? "rotate-45 translate-y-[7px] w-7 bg-white"
               : "animate-burgerPulse1"
           )}
         />
@@ -63,22 +71,26 @@ export default function MainAppLayout({
 
       {isOpen && (
         <div className="fixed top-10 right-16 flex justify-around items-center space-x-4 bg-[#DABF94]/40 py-3 pl-6 pr-24 rounded-[30px] z-40 mobile:right-24">
-          <Link href="/profile" onClick={handleNavigationClick}>
+          <Link
+            href={userID ? `/profile` : `/auth`}
+            onClick={handleNavigationClick}
+          >
             <Image src="/profile.png" alt="profile" width={14} height={17} />
           </Link>
           {/* <Image src="/favourites.png" alt="favourites" width={18} height={17} /> */}
           <Link href="/" onClick={handleNavigationClick}>
             <Image src="/home.png" alt="home" width={18} height={17} />
           </Link>
-
-          <Image
-            onClick={handleLogout}
-            className="cursor-pointer"
-            src="/exit.png"
-            alt="exit"
-            width={19}
-            height={19}
-          />
+          <Link href="/" onClick={handleLogout}>
+            <Image
+              // onClick={handleLogout}
+              className="cursor-pointer"
+              src="/exit.png"
+              alt="exit"
+              width={19}
+              height={19}
+            />
+          </Link>
 
           {/* <Image src="/users.png" alt="users" width={21} height={14} /> */}
         </div>

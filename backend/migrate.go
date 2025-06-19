@@ -10,5 +10,5 @@ func main() {
 	database.ConnectDB()
 
 	// Миграция моделей (создание таблиц)
-	database.DB.AutoMigrate(&models.User{}, &models.Recipes{})
+	database.DB.AutoMigrate(&models.User{}, &models.Recipes{}, &models.Favorite{})
 }

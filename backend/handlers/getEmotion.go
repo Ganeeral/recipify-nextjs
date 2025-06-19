@@ -1,9 +1,9 @@
 package handlers
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
-	"bytes"
 	"fmt"
 	"log"
 	"net/http"
@@ -34,11 +34,14 @@ func SetDB(database *pgxpool.Pool) {
 func GenerateRecipe(c *gin.Context) {
 	var req RecipeRequest
 
-	// Валидация входных данных
-	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Неверный формат данных"})
-		return
-	}
+
+if err := c.ShouldBindJSON(&req); err != nil {
+	log.Printf("Ошибка биндинга: %v", err)
+	c.JSON(http.StatusBadRequest, gin.H{"error": "Неверный формат данных"})
+	return
+}
+
+log.Printf("Получен запрос от user_id=%d с ингредиентами: %s", req.UserID, req.Ingredients)
 
 	// Отправка ингредиентов на Node.js сервер
 	recipe, err := fetchRecipeFromNode(req.Ingredients)
@@ -60,32 +63,30 @@ func GenerateRecipe(c *gin.Context) {
 	c.JSON(http.StatusOK, recipe)
 }
 
-// Функция отправки данных на Node.js сервер
+
 func fetchRecipeFromNode(ingredients string) (RecipeResponse, error) {
 	var result RecipeResponse
 
-	// Адрес Node.js сервера
-	nodeServerURL := "http://localhost:5000/generate-recipe"
 
-	// Подготовка тела запроса
+	nodeServerURL := "https://ai-backend-delico.cloudpub.ru/generate-recipe"
+
+
 	requestBody, err := json.Marshal(map[string]string{"ingredients": ingredients})
 	if err != nil {
 		return result, fmt.Errorf("ошибка формирования тела запроса: %v", err)
 	}
 
-	// Отправка POST-запроса
+
 	resp, err := http.Post(nodeServerURL, "application/json", bytes.NewBuffer(requestBody))
 	if err != nil {
 		return result, fmt.Errorf("ошибка отправки запроса на сервер: %v", err)
 	}
 	defer resp.Body.Close()
 
-	// Проверка кода ответа
 	if resp.StatusCode != http.StatusOK {
 		return result, fmt.Errorf("сервер вернул код %d", resp.StatusCode)
 	}
 
-	// Декодирование ответа
 	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
 		return result, fmt.Errorf("ошибка декодирования ответа: %v", err)
 	}
@@ -93,16 +94,30 @@ func fetchRecipeFromNode(ingredients string) (RecipeResponse, error) {
 	return result, nil
 }
 
-// Функция сохранения рецепта в базу данных
+
 func saveRecipeToDB(userID int, ingredients, recipe string) error {
-	_, err := db.Exec(context.Background(), `
-		INSERT INTO recipes (user_id, ingredients, recipe)
-		VALUES ($1, $2, $3)
-	`, userID, ingredients, recipe)
+    // Проверяем существование пользователя
+    var exists bool
+    err := db.QueryRow(context.Background(), 
+        "SELECT EXISTS(SELECT 1 FROM users WHERE id = $1)", userID).Scan(&exists)
+    
+    if err != nil {
+        return fmt.Errorf("ошибка проверки пользователя: %v", err)
+    }
+    
+    if !exists {
+        return fmt.Errorf("пользователь с ID %d не существует", userID)
+    }
 
-	if err != nil {
-		return fmt.Errorf("ошибка сохранения в базу данных: %v", err)
-	}
+    // Вставляем рецепт
+    _, err = db.Exec(context.Background(), `
+        INSERT INTO recipes (user_id, ingredients, recipe)
+        VALUES ($1, $2, $3)
+    `, userID, ingredients, recipe)
 
-	return nil
+    if err != nil {
+        return fmt.Errorf("ошибка сохранения в базу данных: %v", err)
+    }
+
+    return nil
 }

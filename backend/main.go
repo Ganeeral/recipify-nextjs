@@ -13,8 +13,8 @@ import (
 )
 
 func main() {
-    
-    connString := "postgresql://postgres:0897187526@localhost:5432/Recipify"
+
+	connString := "postgresql://postgres:0897187526@localhost:5432/Recipify"
 	db, err := pgxpool.Connect(context.Background(), connString)
 	if err != nil {
 		log.Fatalf("Не удалось подключиться к базе данных: %v", err)
@@ -24,37 +24,48 @@ func main() {
 	// Передача подключения обработчику
 	handlers.SetDB(db)
 
-
-
 	database.ConnectDB()
 
 	r := gin.Default()
 	auth := r.Group("/")
 
 	r.Use(cors.New(cors.Config{
-        AllowOrigins:     []string{"*"},
-        AllowMethods:     []string{"POST", "GET", "OPTIONS", "PUT"},
-        AllowHeaders:     []string{"Content-Type", "Authorization"},
-        ExposeHeaders:    []string{"Content-Length"},
-        AllowCredentials: true,
-        MaxAge:           12 * time.Hour,
-    }))
+		AllowOrigins:     []string{"*"},
+		AllowMethods:     []string{"POST", "GET", "OPTIONS", "PUT", "DELETE"},
+		AllowHeaders:     []string{"Content-Type", "Authorization"},
+		ExposeHeaders:    []string{"Content-Length"},
+		AllowCredentials: true,
+		MaxAge:           12 * time.Hour,
+	}))
 	auth.Use(cors.New(cors.Config{
-        AllowOrigins:     []string{"*"},
-        AllowMethods:     []string{"POST", "GET", "OPTIONS", "PUT"},
-        AllowHeaders:     []string{"Content-Type", "Authorization"},
-        ExposeHeaders:    []string{"Content-Length"},
-        AllowCredentials: true,
-        MaxAge:           12 * time.Hour,
-    }))
+		AllowOrigins:     []string{"*"},
+		AllowMethods:     []string{"POST", "GET", "OPTIONS", "PUT", "DELETE"},
+		AllowHeaders:     []string{"Content-Type", "Authorization"},
+		ExposeHeaders:    []string{"Content-Length"},
+		AllowCredentials: true,
+		MaxAge:           12 * time.Hour,
+	}))
 
-	r.GET("/users/:id", handlers.GetUser)
-	r.PUT("/users/:id", handlers.UpdateUser)
+	users := r.Group("/users")
+	{
+		users.GET("/:id", handlers.GetUser)
+		users.PUT("/:id", handlers.UpdateUser)
+		// Смена пароля:
+		users.PUT("/:id/password", handlers.ChangePassword)
+	}
+
 	r.GET("/user/:id/recipes", handlers.GetUserRecipes)
 
 	r.POST("/register", handlers.RegisterUser)
 	r.POST("/login", handlers.Login)
-    r.POST("/generate-recipe", handlers.GenerateRecipe)
+	r.POST("/generate-recipe", handlers.GenerateRecipe)
 
-	r.Run(":8080")
+	favs := r.Group("/users/:id/favorites")
+	{
+		favs.GET("", handlers.GetFavorites)             // GET /users/:id/favorites
+		favs.POST("", handlers.AddFavorite)             // POST /users/:id/favorites
+		favs.DELETE("/:favId", handlers.RemoveFavorite) // DELETE /users/:id/favorites/:favId
+	}
+
+	r.Run(":8081")
 }
