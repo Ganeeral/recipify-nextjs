@@ -2,6 +2,8 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 // interface UserData {
 //   id: number;
@@ -12,6 +14,7 @@ import React, { useEffect, useState } from "react";
 interface PasswordForm {
   oldPassword: string;
   newPassword: string;
+  confirmPassword: string;
 }
 
 const ProfileUser: React.FC = () => {
@@ -21,6 +24,7 @@ const ProfileUser: React.FC = () => {
   const [passwordForm, setPasswordForm] = useState<PasswordForm>({
     oldPassword: "",
     newPassword: "",
+    confirmPassword: "",
   });
   const [passwordErrors, setPasswordErrors] = useState<string>("");
 
@@ -73,7 +77,7 @@ const ProfileUser: React.FC = () => {
 
   // Открыть/закрыть модалку смены пароля
   const openPasswordModal = () => {
-    setPasswordForm({ oldPassword: "", newPassword: "" });
+    setPasswordForm({ oldPassword: "", newPassword: "", confirmPassword: "" });
     setPasswordErrors("");
     setShowPasswordModal(true);
   };
@@ -102,6 +106,10 @@ const ProfileUser: React.FC = () => {
       setPasswordErrors("Новый пароль должен отличаться от старого");
       return;
     }
+    if (passwordForm.newPassword !== passwordForm.confirmPassword) {
+      setPasswordErrors("Пароли не совпадают");
+      return;
+    }
 
     try {
       const response = await fetch(
@@ -120,6 +128,7 @@ const ProfileUser: React.FC = () => {
         setPasswordErrors(data.error || "Ошибка при смене пароля");
       } else {
         // Успешно
+        toast.success("Пароль успешно изменен");
         closePasswordModal();
         // Можно показать уведомление о том, что пароль успешно изменён
       }
@@ -239,12 +248,12 @@ const ProfileUser: React.FC = () => {
                   minLength={6}
                 />
                 <label className="text-black font-['ArsenalR'] mb-1">
-                 Повторите пароль
+                  Повторите пароль
                 </label>
                 <input
                   type="password"
-                  name="newPassword"
-                  value={passwordForm.newPassword}
+                  name="confirmPassword"
+                  value={passwordForm.confirmPassword}
                   onChange={handlePasswordChange}
                   className="border border-[#3F1D11] px-2 py-1 outline-none rounded text-[#3F1D11] bg-[#ffffff]"
                   required
@@ -266,6 +275,18 @@ const ProfileUser: React.FC = () => {
           </div>
         </div>
       )}
+      <ToastContainer
+        position="top-right"
+        autoClose={1000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="dark"
+      />
     </div>
   );
 };

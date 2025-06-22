@@ -13,7 +13,7 @@ app.use(bodyParser.json());
 const openai = new OpenAI({
   baseURL: "https://openrouter.ai/api/v1",
   apiKey:
-    "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",
+    "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",
 });
 
 app.post("/generate-recipe", async (req, res) => {

@@ -3,6 +3,7 @@ import React, { useState } from "react";
 import { toast, ToastContainer } from "react-toastify";
 import { motion } from "framer-motion";
 import "react-toastify/dist/ReactToastify.css";
+import Link from "next/link";
 
 const SearchAi = () => {
   const [ingredients, setIngredients] = useState("");
@@ -19,9 +20,22 @@ const SearchAi = () => {
     const userID = Number(localStorage.getItem("id"));
 
     if (!userID) {
-      toast.error("Авторизируйтесь перед тем как сгенерировать рецепт!", {
-        position: "top-center",
-      });
+      toast.error(
+        <div>
+          Авторизируйтесь перед тем как сгенерировать рецепт! <br />
+          <Link
+            href={"/auth"}
+            className="flex mr-auto justify-end items-end bg-white text-black px-2 py-1 rounded text-sm transition"
+          >
+            Войти
+          </Link>
+        </div>,
+        {
+          position: "top-center",
+          autoClose: false,
+          closeButton: false,
+        }
+      );
       return;
     }
 
@@ -48,7 +62,6 @@ const SearchAi = () => {
       }
 
       const data = await response.json();
-      // В функции handleSearch после получения данных:
       const cleanedRecipe = data.recipe
         .replace(/\*\*\*|```|plaintext/g, "")
         .trim();
@@ -69,6 +82,7 @@ const SearchAi = () => {
     }
   };
 
+  // ... остальной код остается без изменений
   const handleGenerateNew = () => {
     setRecipe("");
     handleSearch();
@@ -97,14 +111,14 @@ const SearchAi = () => {
   };
 
   return (
-    <div className="flex flex-col items-center my-auto">
+    <div className="flex flex-col items-center my-auto px-6">
       <ToastContainer />
       <form
         onSubmit={(e) => {
           e.preventDefault();
           handleSearch();
         }}
-        className="flex justify-center items-center font-['ArsenalR'] w-full text-[#DABF94] mt-[50px] md:mt-[80px] lg:mt-[100px] xl:mt-[140px] px-4"
+        className="flex justify-center items-center font-['ArsenalR'] w-full text-[#DABF94] mt-[50px] md:mt-[80px] lg:mt-[100px] xl:mt-[140px]"
       >
         <div className="flex justify-center items-center relative w-full max-w-[1400px]">
           <input
@@ -148,7 +162,7 @@ const SearchAi = () => {
 
       {recipe && !loading && (
         <motion.div
-          className="w-full lg:min-w-[1000px] xl:min-w-[1200px] mt-10 bg-[#dabf94d1] mb-[50px] rounded-[20px] shadow-md p-5 max-w-[800px] z-10 text-black"
+          className="w-full lg:min-w-[1000px] xl:min-w-[1200px] mx-6 mt-10 bg-[#dabf94d1] mb-[50px] rounded-[20px] shadow-md p-5 max-w-[800px] z-10 text-black"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 1 }}

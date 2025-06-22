@@ -1,10 +1,9 @@
-'use client';
+"use client";
 
 import Image from "next/image";
 import Banner from "@/components/banner/Banner.tsx";
 import About from "@/components/about/About.tsx";
 import Search from "@/components/search/Search.tsx";
-
 
 export default function Home() {
   return (
@@ -12,9 +11,9 @@ export default function Home() {
       <Banner />
       <About />
       <Search />
-      <div className="fixed inset-0 w-full h-full overflow-hidden">
+      <div className="fixed inset-0 w-full h-full overflow-hidden -z-50">
         <Image
-          className="w-full h-full object-cover"
+          className="w-full h-full object-cover "
           src="/grid.png"
           alt=""
           layout="fill"

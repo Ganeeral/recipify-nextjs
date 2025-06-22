@@ -123,7 +123,7 @@ export default function Auth() {
 
       <form
         onSubmit={handleSubmit}
-        className={`flex flex-col justify-center h-screen w-full blur__banner backdrop-opacity-10 backdrop-invert bg-[#DABF94]/60 rounded-[20px] text-[#F9F1E6] max-w-[310px] mobile-xs:min-w-[425px] sm:min-w-[350px] md:min-w-[480px] max-h-[550px] px-[15px] mobile-xs:px-[50px] pt-8 pb-14 gap-64 transition-transform duration-500 ${
+        className={`flex flex-col justify-center h-screen w-full blur__banner backdrop-opacity-10 backdrop-invert bg-[#DABF94]/60 rounded-[20px] text-[#F9F1E6] max-w-[310px] mobile-xs:min-w-[425px] sm:min-w-[350px] md:min-w-[480px] max-h-[580px] px-[15px] mobile-xs:px-[50px] pt-8 pb-14 gap-64 transition-transform duration-500 ${
           isLogin ? " md:-translate-x-[480px]" : ""
         }`}
       >
