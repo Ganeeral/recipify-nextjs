@@ -29,7 +29,7 @@ export default function RootLayout({
   return (
     <html lang="ru">
       <head>
-        <link rel="shortcut icon" href="/fon.png" type="image/x-icon" />
+        <link rel="shortcut icon" href="https://delico.vercel.app/fon.png" type="image/x-icon" />
       </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
