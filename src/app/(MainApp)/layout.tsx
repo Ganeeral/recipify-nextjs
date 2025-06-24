@@ -23,6 +23,7 @@ export default function MainAppLayout({
   const handleLogout = () => {
     localStorage.removeItem("authToken");
     localStorage.removeItem("id");
+    setUserID(null); // Сбрасываем userID при выходе
     setIsOpen(false); // Закрываем меню после выхода
   };
 
@@ -32,15 +33,6 @@ export default function MainAppLayout({
 
   return (
     <div id="page" className="relative h-full">
-      {/* <Image
-        className="absolute top-0"
-        src="/fon.png"
-        alt="fon image"
-        width={800}
-        height={757}
-        priority
-      /> */}
-
       <button
         className="fixed top-12 right-20 flex flex-col items-center justify-center space-y-1 p-2 z-50 mobile:right-28 focus:border-none"
         onClick={() => setIsOpen(!isOpen)}
@@ -71,28 +63,28 @@ export default function MainAppLayout({
 
       {isOpen && (
         <div className="fixed top-10 right-16 flex justify-around items-center space-x-4 bg-[#DABF94]/40 py-3 pl-6 pr-24 rounded-[30px] z-40 mobile:right-24">
+          <Link href="/" onClick={handleNavigationClick}>
+            <Image src="/home.png" alt="home" width={18} height={17} />
+          </Link>
           <Link
             href={userID ? `/profile` : `/auth`}
             onClick={handleNavigationClick}
           >
             <Image src="/profile.png" alt="profile" width={14} height={17} />
           </Link>
-          {/* <Image src="/favourites.png" alt="favourites" width={18} height={17} /> */}
-          <Link href="/" onClick={handleNavigationClick}>
-            <Image src="/home.png" alt="home" width={18} height={17} />
-          </Link>
-          <Link href="/" onClick={handleLogout}>
-            <Image
-              // onClick={handleLogout}
-              className="cursor-pointer"
-              src="/exit.png"
-              alt="exit"
-              width={19}
-              height={19}
-            />
-          </Link>
 
-          {/* <Image src="/users.png" alt="users" width={21} height={14} /> */}
+          {/* Показываем кнопку выхода только если пользователь авторизован */}
+          {userID && (
+            <Link href="/" onClick={handleLogout}>
+              <Image
+                className="cursor-pointer"
+                src="/exit.png"
+                alt="exit"
+                width={19}
+                height={19}
+              />
+            </Link>
+          )}
         </div>
       )}
 

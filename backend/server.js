@@ -13,7 +13,7 @@ app.use(bodyParser.json());
 const openai = new OpenAI({
   baseURL: "https://openrouter.ai/api/v1",
   apiKey:
-    "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",
+    "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",
 });
 
 app.post("/generate-recipe", async (req, res) => {
@@ -48,7 +48,7 @@ app.post("/generate-recipe", async (req, res) => {
 `;
 
     const result = await openai.chat.completions.create({
-      model: "mistralai/devstral-small:free",
+      model: "deepseek/deepseek-chat-v3-0324:free",
       messages: [
         {
           role: "user",
